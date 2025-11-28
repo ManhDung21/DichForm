@@ -21,9 +21,28 @@ export default function CVForm() {
         }
     });
 
-    const onSubmit = (data: FieldValues) => {
-        console.log(data);
-        alert(JSON.stringify(data, null, 2));
+    const onSubmit = async (data: FieldValues) => {
+        try {
+            const response = await fetch('/api/cv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Lưu thông tin thành công!');
+                console.log('Saved CV:', result.data);
+            } else {
+                alert('Lỗi khi lưu thông tin: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Đã xảy ra lỗi khi gửi biểu mẫu.');
+        }
     };
 
     return (
