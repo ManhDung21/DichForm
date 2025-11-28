@@ -21,7 +21,12 @@ export default function CVForm() {
         }
     });
 
+    const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [submitMessage, setSubmitMessage] = React.useState('');
+
     const onSubmit = async (data: FieldValues) => {
+        setSubmitStatus('loading');
+        setSubmitMessage('');
         try {
             const response = await fetch('/api/cv', {
                 method: 'POST',
@@ -34,14 +39,17 @@ export default function CVForm() {
             const result = await response.json();
 
             if (result.success) {
-                alert('Lưu thông tin thành công!');
+                setSubmitStatus('success');
+                setSubmitMessage('Lưu thông tin thành công!');
                 console.log('Saved CV:', result.data);
             } else {
-                alert('Lỗi khi lưu thông tin: ' + result.error);
+                setSubmitStatus('error');
+                setSubmitMessage('Lỗi khi lưu thông tin: ' + result.error);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting form:', error);
-            alert('Đã xảy ra lỗi khi gửi biểu mẫu.');
+            setSubmitStatus('error');
+            setSubmitMessage('Đã xảy ra lỗi khi gửi biểu mẫu: ' + error.message);
         }
     };
 
@@ -85,10 +93,22 @@ export default function CVForm() {
                     <OtherInfo />
                 </div>
 
-                <div style={{ marginTop: '20px' }}>
-                    <button type="submit" className={styles.submitBtn}>
-                        LƯU THÔNG TIN
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <button type="submit" className={styles.submitBtn} disabled={submitStatus === 'loading'}>
+                        {submitStatus === 'loading' ? 'ĐANG LƯU...' : 'LƯU THÔNG TIN'}
                     </button>
+                    {submitMessage && (
+                        <div style={{
+                            marginTop: '10px',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            backgroundColor: submitStatus === 'success' ? '#d4edda' : '#f8d7da',
+                            color: submitStatus === 'success' ? '#155724' : '#721c24',
+                            border: `1px solid ${submitStatus === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+                        }}>
+                            {submitMessage}
+                        </div>
+                    )}
                 </div>
             </form>
         </FormProvider>
